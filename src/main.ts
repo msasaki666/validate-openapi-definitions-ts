@@ -1,19 +1,16 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import core from '@actions/core'
+import exec from '@actions/exec'
 
-async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+const parseArg = (arg: string): string[] => {
+  const trimed = arg.trim()
+  if (trimed === '') []
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
-  }
+  return trimed.split(/\s+/)
 }
 
-run()
+try {
+  const args = parseArg(core.getInput('args'))
+  exec.exec('npx', ['@redocly/cli', 'lint', ...args])
+} catch (error) {
+  if (error instanceof Error) core.setFailed(error.message)
+}
